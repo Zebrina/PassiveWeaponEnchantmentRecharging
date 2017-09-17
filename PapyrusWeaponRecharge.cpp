@@ -7,12 +7,15 @@
 #include "skse64/PapyrusVM.h"
 
 float PapyrusWeaponRecharge::RechargeAllWeaponsInInventory(StaticFunctionTag*, Actor* actor, float points, float enchantingMultiplier, bool requireSoulGem) {
+	_MESSAGE("Calling RechargeAllWeaponsInInventory(0x%.8x, %f, %f, %i)", actor->formID, points, enchantingMultiplier, requireSoulGem);
 	return WeaponRecharge::RechargeAllWeaponsInInventory(actor, points, enchantingMultiplier, requireSoulGem);
 }
 void PapyrusWeaponRecharge::RechargeAllWeaponsInPlayerCell(StaticFunctionTag*, float points, float enchantingMultiplier, TESFaction* filterFaction, bool requireSoulGem) {
+	_MESSAGE("Calling RechargeAllWeaponsInPlayerCell(%f, %f, ???, %i)", points, enchantingMultiplier, requireSoulGem);
 	WeaponRecharge::RechargeAllWeaponsInPlayerCell(points, enchantingMultiplier, filterFaction, requireSoulGem);
 }
 void PapyrusWeaponRecharge::RechargeAllWeaponsInFollowerInventory(StaticFunctionTag*, float points, float enchantingMultiplier, bool requireSoulGem) {
+	_MESSAGE("Calling RechargeAllWeaponsInFollowerInventory(%f, %f, %i)", points, enchantingMultiplier, requireSoulGem);
 	WeaponRecharge::RechargeAllWeaponsInFollowerInventory(points, enchantingMultiplier, requireSoulGem);
 }
 

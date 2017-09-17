@@ -12,11 +12,11 @@
     <ClInclude Include="PapyrusWeaponRecharge.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Exports.def" />
     <None Include="PropertySheet.props" />
     <None Include="Distributable\Scripts\Source\PassiveWeaponEnchantmentRecharging.psc">
       <Filter>Papyrus</Filter>
     </None>
+    <None Include="Exports.def" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Papyrus">
