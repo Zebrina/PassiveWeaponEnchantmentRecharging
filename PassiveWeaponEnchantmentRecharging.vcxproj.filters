@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="SoulGemBuffer.cpp" />
+    <ClCompile Include="WeaponRecharge.cpp" />
+    <ClCompile Include="Global.cpp" />
+    <ClCompile Include="PapyrusWeaponRecharge.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SoulGemBuffer.h" />
+    <ClInclude Include="WeaponRecharge.h" />
+    <ClInclude Include="Global.h" />
+    <ClInclude Include="PapyrusWeaponRecharge.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Exports.def" />
+    <None Include="PropertySheet.props" />
+    <None Include="Distributable\Scripts\Source\PassiveWeaponEnchantmentRecharging.psc">
+      <Filter>Papyrus</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Papyrus">
+      <UniqueIdentifier>{628160cb-c609-493d-80cc-a6866cdcb8f2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
