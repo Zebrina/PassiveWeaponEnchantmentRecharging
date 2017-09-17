@@ -2,10 +2,12 @@ scriptname PWER_MCM extends SKI_ConfigBase
 
 Quest property PWER_RechargeQuest auto
 
-bool property EnabledForPlayer auto
-bool property EnabledForFollowers auto
-float property RechargePointsPerDay auto
+bool property EnabledForPlayer = true auto
+bool property EnabledForFollowers = false auto
 float property RechargeInterval auto
+float property RechargePointsPerDay auto
+float property RechargeMultiplierPlayer auto
+float property RechargeMultiplierFollowers auto
 float property EnchantingSkillRechargeMultiplier auto
 float property ExperienceMultiplier auto
 
@@ -13,6 +15,8 @@ int McmID_EnabledForPlayer
 int McmID_EnabledForFollowers
 int McmID_RechargeInterval
 int McmID_RechargePointsPerDay
+int McmID_RechargeMultiplierPlayer
+int McmID_RechargeMultiplierFollowers
 int McmID_EnchantingSkillRechargeMultiplier
 int McmID_ExperienceMultiplier
 
@@ -24,14 +28,17 @@ int function GetOptionFlags(bool enabled)
 endfunction
 
 event OnConfigInit()
-	EnabledForPlayer = PWER_RechargeQuest.IsRunning()
 endevent
 
 event OnConfigClose()
-	if (EnabledForPlayer && !PWER_RechargeQuest.IsRunning())
-		PWER_RechargeQuest.Start()
-	elseif (!EnabledForPlayer && PWER_RechargeQuest.IsRunning())
-		PWER_RechargeQuest.Stop()
+	if (PWER_RechargeQuest.IsRunning())
+		if (!EnabledForPlayer && !EnabledForFollowers)
+			PWER_RechargeQuest.Stop()
+		endif
+	else
+		if (EnabledForPlayer && EnabledForFollowers)
+			PWER_RechargeQuest.Start()
+		endif
 	endif
 endevent
 
@@ -92,6 +99,20 @@ event OnOptionSliderOpen(int option)
 		SetSliderDialogDefaultValue(600.0)
 		SetSliderDialogRange(10.0, 30000.0)
 		SetSliderDialogInterval(10.0)
+	elseif (option == McmID_RechargeMultiplierPlayer || option == McmID_RechargeMultiplierFollowers)
+		if (option == McmID_RechargeMultiplierPlayer)
+			SetSliderDialogStartValue(RechargeMultiplierPlayer)
+		else
+			SetSliderDialogStartValue(RechargeMultiplierFollowers)
+		endif
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.1, 10.0)
+		SetSliderDialogInterval(0.01)
+	elseif (option == McmID_RechargeMultiplierPlayer)
+		SetSliderDialogStartValue(RechargeMultiplierPlayer)
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.1, 10.0)
+		SetSliderDialogInterval(0.01)
 	elseif (option == McmID_EnchantingSkillRechargeMultiplier)
 		SetSliderDialogStartValue(EnchantingSkillRechargeMultiplier)
 		SetSliderDialogDefaultValue(8.0)
@@ -110,6 +131,10 @@ event OnOptionSliderAccept(int option, float value)
 		RechargeInterval = value
 	elseif (option == McmID_RechargePointsPerDay)
 		RechargePointsPerDay = value
+	elseif (option == McmID_RechargeMultiplierPlayer)
+		RechargeMultiplierPlayer = value
+	elseif (option == McmID_RechargeMultiplierFollowers)
+		RechargeMultiplierFollowers = value
 	elseif (option == McmID_EnchantingSkillRechargeMultiplier)
 		EnchantingSkillRechargeMultiplier = value
 	elseif (option == McmID_ExperienceMultiplier)
