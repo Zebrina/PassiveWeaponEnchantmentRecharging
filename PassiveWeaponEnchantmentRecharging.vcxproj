@@ -149,7 +149,8 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)$(TargetExt) $(ProjectDir)Distributable\SKSE64\Plugins\$(ProjectName)$(TargetExt)</Command>
+      <Command>copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)$(TargetExt)" "$(ProjectDir)Distributable\SKSE\Plugins\$(ProjectName)$(TargetExt)"
+copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)$(TargetExt)" "C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\SKSE\Plugins\$(ProjectName)$(TargetExt)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -158,14 +159,12 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
     <None Include="PropertySheet.props" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Global.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PapyrusWeaponRecharge.cpp" />
     <ClCompile Include="SoulGemBuffer.cpp" />
     <ClCompile Include="WeaponRecharge.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Global.h" />
     <ClInclude Include="PapyrusWeaponRecharge.h" />
     <ClInclude Include="SoulGemBuffer.h" />
     <ClInclude Include="WeaponRecharge.h" />

@@ -4,13 +4,11 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SoulGemBuffer.cpp" />
     <ClCompile Include="WeaponRecharge.cpp" />
-    <ClCompile Include="Global.cpp" />
     <ClCompile Include="PapyrusWeaponRecharge.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoulGemBuffer.h" />
     <ClInclude Include="WeaponRecharge.h" />
-    <ClInclude Include="Global.h" />
     <ClInclude Include="PapyrusWeaponRecharge.h" />
   </ItemGroup>
   <ItemGroup>
