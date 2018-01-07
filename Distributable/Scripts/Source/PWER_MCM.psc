@@ -4,12 +4,12 @@ Quest property PWER_RechargeQuest auto
 
 bool property EnabledForPlayer = true auto
 bool property EnabledForFollowers = false auto
-float property RechargeInterval auto
-float property RechargePointsPerDay auto
-float property RechargeMultiplierPlayer auto
-float property RechargeMultiplierFollowers auto
-float property EnchantingSkillRechargeMultiplier auto
-float property ExperienceMultiplier auto
+float property RechargeInterval = 30.0 auto
+float property RechargePointsPerDay = 600.0 auto
+float property RechargeMultiplierPlayer = 1.0 auto
+float property RechargeMultiplierFollowers = 1.0 auto
+float property EnchantingSkillRechargeMultiplier = 8.0 auto
+float property ExperienceMultiplier = 0.5 auto
 
 int McmID_EnabledForPlayer
 int McmID_EnabledForFollowers
@@ -36,7 +36,7 @@ event OnConfigClose()
 			PWER_RechargeQuest.Stop()
 		endif
 	else
-		if (EnabledForPlayer && EnabledForFollowers)
+		if (EnabledForPlayer || EnabledForFollowers)
 			PWER_RechargeQuest.Start()
 		endif
 	endif

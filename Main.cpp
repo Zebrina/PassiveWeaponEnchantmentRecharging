@@ -41,7 +41,7 @@ extern "C" {
 
 			return false;
 		}
-		else if (skse->runtimeVersion != RUNTIME_VERSION_1_4_2) {
+		else if (skse->runtimeVersion != RUNTIME_VERSION_1_5_23) {
 			_MESSAGE("unsupported runtime version %08X", skse->runtimeVersion);
 
 			return false;

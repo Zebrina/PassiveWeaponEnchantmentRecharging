@@ -1,7 +1,7 @@
 game: skyrim
-output: C:\Projects\SkyrimSE\skse64\PassiveWeaponEnchantmentRecharging\Distributable\Scripts
+output: D:\Projects\SkyrimSE\skse64\PassiveWeaponEnchantmentRecharging\Distributable\Scripts
 imports:
-    - C:\Projects\SkyrimSE\skse64\PassiveWeaponEnchantmentRecharging\Distributable\Scripts\Source
+    - D:\Projects\SkyrimSE\skse64\PassiveWeaponEnchantmentRecharging\Distributable\Scripts\Source
     - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\SkyUI
     - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\SKSE
     - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\Dragonborn

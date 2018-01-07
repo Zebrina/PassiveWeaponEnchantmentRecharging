@@ -12,6 +12,8 @@
 //#include <algorithm>
 
 #define ENCHANTING_AVID	23
+#define RIGHTITEMCHARGE_AVID 64
+#define LEFTITEMCHARGE_AVID 82
 
 template <class T>
 struct AcceptEqual {
@@ -147,20 +149,43 @@ struct RechargeWeapon {
 
 	ForEachResult operator()(Actor* actor, TESObjectWEAP* weapon, BaseExtraList* extra) {
 		if (extra) {
-			if (ExtraCharge* extraCharge = static_cast<ExtraCharge*>(extra->GetByType(kExtraData_Charge))) {
-				float maxCharge = 0.0f;
-				if (weapon->enchantable.enchantment) {
-					maxCharge = (float)weapon->enchantable.maxCharge;
-				}
-				else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(extra->GetByType(kExtraData_Enchantment))) {
-					maxCharge = (float)extraEnchant->maxCharge;
+			float maxCharge = 0.0f;
+			if (weapon->enchantable.enchantment) {
+				maxCharge = (float)weapon->enchantable.maxCharge;
+			} else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(extra->GetByType(kExtraData_Enchantment))) {
+				maxCharge = (float)extraEnchant->maxCharge;
+			}
+
+			if (maxCharge > 0.0f) {
+				ExtraCharge* extraCharge = static_cast<ExtraCharge*>(extra->GetByType(kExtraData_Charge));
+				if (!extraCharge) {
+					if (extra->HasType(kExtraData_WornLeft)) {
+						float rightItemCharge = actor->actorValueOwner.GetCurrent(LEFTITEMCHARGE_AVID);
+						if (rightItemCharge < maxCharge) {
+							extraCharge = ExtraCharge::Create();
+							extraCharge->charge = rightItemCharge;
+							extra->Add(kExtraData_Charge, extraCharge);
+						}
+					} else if (extra->HasType(kExtraData_Worn)) {
+						float leftItemCharge = actor->actorValueOwner.GetCurrent(RIGHTITEMCHARGE_AVID);
+						if (leftItemCharge < maxCharge) {
+							extraCharge = ExtraCharge::Create();
+							extraCharge->charge = leftItemCharge;
+							extra->Add(kExtraData_Charge, extraCharge);
+						}
+					}
 				}
 
-				if (maxCharge > 0.0f) {
+				if (extraCharge) {
 					float pointsToRechargeForActor = pointsToRecharge * getActorEnchantingMultiplier(actor, baseEnchantingMultiplier);
 
 					rechargedPoints += min(pointsToRechargeForActor, maxCharge - extraCharge->charge);
 					extraCharge->charge = min(maxCharge, extraCharge->charge + pointsToRechargeForActor);
+
+					// Remove extra charge if full.
+					if (extraCharge->charge == maxCharge) {
+						extra->Remove(kExtraData_Charge, extraCharge);
+					}
 
 					updateActorEquippedWeapon(actor, weapon, extra);
 				}
@@ -172,7 +197,7 @@ struct RechargeWeapon {
 };
 
 float WeaponRecharge::RechargeAllWeaponsInInventory(Actor* actor, float points, float enchantingMultiplier, bool requireSoulGem) {
-	if (actor && points > 0) {
+	if (actor && points > 0.0f) {
 		RechargeWeapon recharge(points, enchantingMultiplier);
 
 		forEachObjectInActorInventory<TESObjectWEAP>(actor, recharge);

@@ -25,14 +25,14 @@ event OnUpdateGameTime()
 	TimeOfLastRecharge = currentTime
 
 	float basePointsToRecharge = daysElapsed * PWER_MCMQuest.RechargePointsPerDay
-
-	if (PWER_MCMQuest.EnabledForPlayer)
-		float pointsRecharged = PassiveWeaponEnchantmentRecharging.RechargeAllWeaponsInInventory(PlayerRef, basePointsToRecharge * PWER_MCMQuest.RechargeMultiplierPlayer, PWER_MCMQuest.EnchantingSkillRechargeMultiplier)
-		RewardExperience(pointsRecharged)
-	endif
-
-	if (PWER_MCMQuest.EnabledForFollowers)
-		PassiveWeaponEnchantmentRecharging.RechargeAllWeaponsInFollowerInventory(basePointsToRecharge * PWER_MCMQuest.RechargeMultiplierFollowers, PWER_MCMQuest.EnchantingSkillRechargeMultiplier)
+	if (basePointsToRecharge >= 1.0)
+		if (PWER_MCMQuest.EnabledForPlayer)
+			float pointsRecharged = PassiveWeaponEnchantmentRecharging.RechargeAllWeaponsInInventory(PlayerRef, basePointsToRecharge * PWER_MCMQuest.RechargeMultiplierPlayer, PWER_MCMQuest.EnchantingSkillRechargeMultiplier)
+			RewardExperience(pointsRecharged)
+		endif
+		if (PWER_MCMQuest.EnabledForFollowers)
+			PassiveWeaponEnchantmentRecharging.RechargeAllWeaponsInFollowerInventory(basePointsToRecharge * PWER_MCMQuest.RechargeMultiplierFollowers, PWER_MCMQuest.EnchantingSkillRechargeMultiplier)
+		endif
 	endif
 
 	if (PWER_MCMQuest.EnabledForPlayer || PWER_MCMQuest.EnabledForFollowers)
@@ -45,7 +45,7 @@ event OnUpdateGameTime()
 endevent
 
 function RewardExperience(float fPointsRecharged)
-	if (iPointsRecharged > 0)
+	if (fPointsRecharged > 0)
 		EnchantingAVI.AddSkillExperience(0.0002 * PWER_MCMQuest.ExperienceMultiplier * fPointsRecharged)
 	endif
 endfunction
