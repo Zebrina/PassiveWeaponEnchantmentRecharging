@@ -60,7 +60,7 @@ enum ForEachResult {
 /* Functor(Actor*) */
 template <class Functor>
 void forEachActorInPlayerCell(Functor& f) {
-	ForEachResult lastResult;
+	ForEachResult lastResult = Continue;
 
 	do {
 		if (TESObjectCELL* currentCell = (*g_thePlayer)->parentCell) {
@@ -82,7 +82,7 @@ void forEachActorInPlayerCell(Functor& f) {
 /* If T is TESForm (default) all form types will be processed. */
 template <class T = TESForm, class Functor>
 void forEachObjectInActorInventory(Actor* actor, Functor& f) {
-	ForEachResult lastResult;
+	ForEachResult lastResult = Continue;
 	EntryDataList* containerDataList;
 
 	do {
@@ -145,7 +145,10 @@ struct RechargeWeapon {
 	float rechargedPoints;
 
 	RechargeWeapon(float _pointsToRecharge, float _baseEnchantingMultiplier) :
-		pointsToRecharge(_pointsToRecharge), rechargedPoints(0.0f) {}
+		pointsToRecharge(_pointsToRecharge),
+		baseEnchantingMultiplier(_baseEnchantingMultiplier),
+		rechargedPoints(0.0f) {
+	}
 
 	ForEachResult operator()(Actor* actor, TESObjectWEAP* weapon, BaseExtraList* extra) {
 		if (extra) {
@@ -157,37 +160,33 @@ struct RechargeWeapon {
 			}
 
 			if (maxCharge > 0.0f) {
-				ExtraCharge* extraCharge = static_cast<ExtraCharge*>(extra->GetByType(kExtraData_Charge));
-				if (!extraCharge) {
-					if (extra->HasType(kExtraData_WornLeft)) {
-						float rightItemCharge = actor->actorValueOwner.GetCurrent(LEFTITEMCHARGE_AVID);
-						if (rightItemCharge < maxCharge) {
-							extraCharge = ExtraCharge::Create();
-							extraCharge->charge = rightItemCharge;
-							extra->Add(kExtraData_Charge, extraCharge);
-						}
-					} else if (extra->HasType(kExtraData_Worn)) {
-						float leftItemCharge = actor->actorValueOwner.GetCurrent(RIGHTITEMCHARGE_AVID);
-						if (leftItemCharge < maxCharge) {
-							extraCharge = ExtraCharge::Create();
-							extraCharge->charge = leftItemCharge;
-							extra->Add(kExtraData_Charge, extraCharge);
-						}
+				float pointsToRechargeForActor = pointsToRecharge * getActorEnchantingMultiplier(actor, baseEnchantingMultiplier);
+
+				bool wornLeft = extra->HasType(kExtraData_WornLeft);
+				bool wornRight = !wornLeft && extra->HasType(kExtraData_Worn);
+				if (wornLeft || wornRight) {
+					UInt32 actorValueID = wornLeft ? LEFTITEMCHARGE_AVID : RIGHTITEMCHARGE_AVID;
+
+					float itemCharge = actor->actorValueOwner.GetCurrent(actorValueID);
+
+					_DMESSAGE("charge: %.2f / %.2f", itemCharge, maxCharge);
+
+					if (itemCharge < maxCharge) {
+						pointsToRechargeForActor = min(maxCharge - itemCharge, pointsToRechargeForActor);
+						rechargedPoints += pointsToRechargeForActor;
+						actor->actorValueOwner.ModBase(actorValueID, pointsToRechargeForActor);
 					}
-				}
-
-				if (extraCharge) {
-					float pointsToRechargeForActor = pointsToRecharge * getActorEnchantingMultiplier(actor, baseEnchantingMultiplier);
-
+				} else if (ExtraCharge* extraCharge = static_cast<ExtraCharge*>(extra->GetByType(kExtraData_Charge))) {
 					rechargedPoints += min(pointsToRechargeForActor, maxCharge - extraCharge->charge);
 					extraCharge->charge = min(maxCharge, extraCharge->charge + pointsToRechargeForActor);
+
+					_DMESSAGE("charge: %.2f / %.2f", extraCharge->charge, maxCharge);
 
 					// Remove extra charge if full.
 					if (extraCharge->charge == maxCharge) {
 						extra->Remove(kExtraData_Charge, extraCharge);
+						_DMESSAGE("extra charge removed");
 					}
-
-					updateActorEquippedWeapon(actor, weapon, extra);
 				}
 			}
 		}
