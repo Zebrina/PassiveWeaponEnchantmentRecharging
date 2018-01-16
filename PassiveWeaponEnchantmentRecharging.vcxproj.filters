@@ -10,6 +10,7 @@
     <ClInclude Include="SoulGemBuffer.h" />
     <ClInclude Include="WeaponRecharge.h" />
     <ClInclude Include="PapyrusWeaponRecharge.h" />
+    <ClInclude Include="Debug.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />

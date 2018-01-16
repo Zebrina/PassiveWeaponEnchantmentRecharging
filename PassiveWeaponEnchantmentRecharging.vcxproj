@@ -39,7 +39,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -77,9 +77,8 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir);$(SolutionDir)..;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,10 +103,20 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <ForcedIncludeFiles>common\IPrefix.h;Debug.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(IncludePath)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>echo Copying DLL to distributable directory.
+xcopy "$(TargetPath)" "$(ProjectDir)Distributable\SKSE\Plugins\$(TargetName)$(TargetExt)" /Y
+echo Copying distributable directory to Skyrim Special Edition data directory.
+xcopy "$(ProjectDir)Distributable\*.dll" "C:\Games\Steam\SteamApps\Common\Skyrim Special Edition\Data\" /Y/S</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -140,8 +149,9 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <ForcedIncludeFiles>common\IPrefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>common\IPrefix.h;Debug.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(IncludePath)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -150,8 +160,10 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
       <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)$(TargetExt)" "$(ProjectDir)Distributable\SKSE\Plugins\$(ProjectName)$(TargetExt)"
-copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)$(TargetExt)" "C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\SKSE\Plugins\$(ProjectName)$(TargetExt)"</Command>
+      <Command>echo Copying DLL to distributable directory.
+xcopy "$(TargetPath)" "$(ProjectDir)Distributable\SKSE\Plugins\$(TargetName)$(TargetExt)" /Y
+echo Copying distributable directory to Skyrim Special Edition data directory.
+xcopy "$(ProjectDir)Distributable\*.dll" "C:\Games\Steam\SteamApps\Common\Skyrim Special Edition\Data\" /Y/S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -166,6 +178,7 @@ copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)$(TargetExt)" 
     <ClCompile Include="WeaponRecharge.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="PapyrusWeaponRecharge.h" />
     <ClInclude Include="SoulGemBuffer.h" />
     <ClInclude Include="WeaponRecharge.h" />
