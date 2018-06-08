@@ -14,14 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
-    <None Include="Distributable\Scripts\Source\PassiveWeaponEnchantmentRecharging.psc">
-      <Filter>Papyrus</Filter>
-    </None>
     <None Include="Exports.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Papyrus">
-      <UniqueIdentifier>{628160cb-c609-493d-80cc-a6866cdcb8f2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>
