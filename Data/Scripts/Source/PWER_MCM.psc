@@ -49,22 +49,19 @@ event OnPageReset(string page)
 
 	AddHeaderOption("$pwer_generaloptions")
 
-	McmID_EnabledForPlayer = AddToggleOption("$pwer_modenabled", EnabledForPlayer)
-
-	int optionFlags = GetOptionFlags(EnabledForPlayer)
-
-	McmID_EnabledForFollowers = AddToggleOption("$pwer_followersenabled", EnabledForFollowers, optionFlags)
-	McmID_RechargeInterval = AddSliderOption("$pwer_scriptdelay", RechargeInterval, "$pwer_seconds", optionFlags)
+	McmID_EnabledForPlayer = AddToggleOption("$pwer_playerenabled", EnabledForPlayer)
+	McmID_EnabledForFollowers = AddToggleOption("$pwer_followersenabled", EnabledForFollowers)
+	McmID_RechargeInterval = AddSliderOption("$pwer_scriptdelay", RechargeInterval, "$pwer_seconds")
 
 	SetCursorPosition(1)
 
 	AddHeaderOption("$pwer_rechargeoptions")
 
-	McmID_RechargePointsPerDay = AddSliderOption("$pwer_rechargespeed", RechargePointsPerDay, "$pwer_pointsperday", optionFlags)
+	McmID_RechargePointsPerDay = AddSliderOption("$pwer_rechargespeed", RechargePointsPerDay, "$pwer_pointsperday")
 
-	McmID_EnchantingSkillRechargeMultiplier = AddSliderOption("$pwer_enchantingmultiplier", EnchantingSkillRechargeMultiplier, "$pwer_atlevelhundred", optionFlags)
+	McmID_EnchantingSkillRechargeMultiplier = AddSliderOption("$pwer_enchantingmultiplier", EnchantingSkillRechargeMultiplier, "$pwer_atlevelhundred")
 
-	McmID_ExperienceMultiplier = AddSliderOption("$pwer_experiencemultiplier", ExperienceMultiplier, "{2}x", optionFlags)
+	McmID_ExperienceMultiplier = AddSliderOption("$pwer_experiencemultiplier", ExperienceMultiplier, "{2}x")
 endevent
 
 event OnOptionHighlight(int option)
