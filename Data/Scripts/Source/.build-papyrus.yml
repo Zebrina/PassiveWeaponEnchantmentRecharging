@@ -1,11 +1,8 @@
 game: skyrim
-output: D:\Projects\SkyrimSE\skse64\PassiveWeaponEnchantmentRecharging\Data\Scripts
+output: D:\Projects\SKSE64\skse64\PassiveWeaponEnchantmentRecharging\Data\Scripts
 imports:
-    - D:\Projects\SkyrimSE\skse64\PassiveWeaponEnchantmentRecharging\Data\Scripts\Source
+    - D:\Projects\SKSE64\skse64\PassiveWeaponEnchantmentRecharging\Data\Scripts\Source
     - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\SkyUI
     - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\SKSE
-    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\Dragonborn
-    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\Dawnguard
-    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\Hearthfire
     - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source
 optimize: true
