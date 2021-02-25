@@ -1,8 +1,0 @@
-game: skyrim
-output: D:\Projects\SKSE64\skse64\PassiveWeaponEnchantmentRecharging\Data\Scripts
-imports:
-    - D:\Projects\SKSE64\skse64\PassiveWeaponEnchantmentRecharging\Data\Scripts\Source
-    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\SkyUI
-    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source\SKSE
-    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source
-optimize: true

@@ -1,0 +1,7 @@
+game: skyrim
+output: D:\Projects\Skyrim\PassiveWeaponEnchantmentRecharging\Data\Scripts
+imports:
+    - D:\Projects\Skyrim\PassiveWeaponEnchantmentRecharging\Data\Source\Scripts
+    - D:\Projects\Skyrim\Papyrus\SkyUI
+    - C:\Games\Steam\steamapps\common\Skyrim Special Edition\Data\Source\Scripts
+optimize: true
