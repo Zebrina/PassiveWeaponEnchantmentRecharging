@@ -1,28 +1,29 @@
 scriptname PWER_RechargeScript extends ReferenceAlias
 
-ActorValueInfo property EnchantingAVI auto hidden
 GlobalVariable property TimeScale auto
 Actor property PlayerRef auto
+ActorValueInfo _enchantingAVI = none
+ActorValueInfo property EnchantingAVI hidden
+    ActorValueInfo function get()
+        if (!_enchantingAVI)
+            _enchantingAVI = ActorValueInfo.GetActorValueInfoByName("Enchanting")
+        endif
+        return _enchantingAVI
+    endfunction
+endproperty
 
 PWER_MCM property PWER_MCMQuest auto
 
 float TimeOfLastRecharge
 
-function StartScript()
-	TimeOfLastRecharge = Utility.GetCurrentGameTime()
-	self.OnUpdateGameTime()
-endfunction
-
 event OnInit()
-	EnchantingAVI = ActorValueInfo.GetActorValueInfoByName("Enchanting")
-
-	StartScript()
+    TimeOfLastRecharge = Utility.GetCurrentGameTime()
+	self.OnUpdateGameTime()
 endevent
 
 event OnUpdateGameTime()
 	float currentTime = Utility.GetCurrentGameTime()
 	float daysElapsed = currentTime - TimeOfLastRecharge
-	TimeOfLastRecharge = currentTime
 
 	float basePointsToRecharge = daysElapsed * PWER_MCMQuest.RechargePointsPerDay
 	if (basePointsToRecharge >= 1.0)
@@ -33,6 +34,7 @@ event OnUpdateGameTime()
 		if (PWER_MCMQuest.EnabledForFollowers)
 			PassiveWeaponEnchantmentRecharging.RechargeAllWeaponsInFollowerInventory(basePointsToRecharge * PWER_MCMQuest.RechargeMultiplierFollowers, PWER_MCMQuest.EnchantingSkillRechargeMultiplier)
 		endif
+        TimeOfLastRecharge = currentTime
 	endif
 
 	if (PWER_MCMQuest.EnabledForPlayer || PWER_MCMQuest.EnabledForFollowers)

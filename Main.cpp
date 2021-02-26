@@ -1,81 +1,67 @@
-// http://www.network-science.de/ascii/ banner3-D
-
-#include "skse64/PluginAPI.h"
-#include "skse64_common/skse_version.h"
-#include "skse64/GameAPI.h"
-
-#include "skse64/GameData.h"
-#include "skse64/GameReferences.h"
-#include "skse64/GameEvents.h"
-#include "skse64/GameTypes.h"
-
-#include "skse64/PapyrusNativeFunctions.h"
-
-#include "skse64_common/SafeWrite.h"
-
 #include "PapyrusWeaponRecharge.h"
 
-constexpr char* PluginName = "Passive Weapon Enchantment Recharging";
+using namespace std;
 
-IDebugLog gLog("PassiveWeaponEnchantmentRecharging.log");
+constexpr const char* PLUGINNAME = "Passive Weapon Enchantment Recharging";
 
-PluginHandle g_pluginHandle = kPluginHandle_Invalid;
-
-SKSEPapyrusInterface* g_papyrusInterface = nullptr;
-
-extern "C" {
-
-	bool SKSEPlugin_Query(const SKSEInterface* skse, PluginInfo* info) {
-		_MESSAGE("SKSEPlugin_Query begin");
-
-		// populate info structure
-		info->infoVersion = PluginInfo::kInfoVersion;
-		info->name = PluginName;
-		info->version = 1;
-
-		// store plugin handle so we can identify ourselves later
-		g_pluginHandle = skse->GetPluginHandle();
-
-		if (skse->isEditor) {
-			_MESSAGE("loaded in editor, marking as incompatible");
-
-			return false;
-		}
-		else if (skse->runtimeVersion != CURRENT_RELEASE_RUNTIME) {
-			_MESSAGE("unsupported runtime version %08X", skse->runtimeVersion);
-
-			return false;
-		}
-
-		g_papyrusInterface = (SKSEPapyrusInterface*)skse->QueryInterface(kInterface_Papyrus);
-		if (!g_papyrusInterface) {
-			_MESSAGE("\tcouldn't get papyrus interface");
-
-			return false;
-		}
-		if (g_papyrusInterface->interfaceVersion < SKSEPapyrusInterface::kInterfaceVersion) {
-			_MESSAGE("\tpapyrus interface too old (%d expected %d)", g_papyrusInterface->interfaceVersion, SKSEPapyrusInterface::kInterfaceVersion);
-
-			return false;
-		}
-
-		// ### do not do anything else in this callback
-		// ### only fill out PluginInfo and return true/false
-
-		_MESSAGE("SKSEPlugin_Query end");
-
-		// supported runtime version
-		return true;
+extern "C" __declspec(dllexport) bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* skse, SKSE::PluginInfo* info) {
+	auto path = SKSE::log::log_directory();
+	if (!path) {
+		return false;
 	}
 
-	bool SKSEPlugin_Load(const SKSEInterface* skse) {
-		_MESSAGE("SKSEPlugin_Load begin");
+	*path /= "PassiveWeaponEnchantmentRecharging.log"sv;
+	auto sink = make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 
-		g_papyrusInterface->Register(PapyrusWeaponRecharge::RegisterFunctions);
+	auto log = make_shared<spdlog::logger>("global log"s, move(sink));
 
-		_MESSAGE("SKSEPlugin_Load end");
+#ifndef NDEBUG
+	log->set_level(spdlog::level::trace);
+	log->flush_on(spdlog::level::trace);
+#else
+	log->set_level(spdlog::level::info);
+	log->flush_on(spdlog::level::info);
+#endif
 
-		return true;
+	spdlog::set_default_logger(move(log));
+	spdlog::set_pattern("%g(%#): [%^%l%$] %v"s);
+
+	LOG_INFO("{}", PLUGINNAME);
+
+	info->infoVersion = SKSE::PluginInfo::kVersion;
+	info->name = PLUGINNAME;
+	info->version = 2;
+
+	if (skse->IsEditor()) {
+		LOG_WARN("Loaded in editor. Plugin will not load!");
+		return false;
 	}
 
-};
+	const REL::Version version = skse->RuntimeVersion();
+	if (version != SKSE::RUNTIME_1_5_97) {
+		LOG_WARN("Unsupported runtime version {}. Plugin will load, but may run into issues!", version.string());
+	}
+
+	return true;
+}
+
+extern "C" __declspec(dllexport) bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* skse) {
+	LOG_INFO("Plugin loading...");
+
+	SKSE::Init(skse);
+
+	const SKSE::PapyrusInterface* papyrus = SKSE::GetPapyrusInterface();
+	if (!papyrus) {
+		LOG_ERROR("Unable to get papyrus interface. Aborting plugin load.");
+		return false;
+	}
+
+	if (!papyrus->Register(PapyrusWeaponRecharge::RegisterFunctions)) {
+		LOG_ERROR("Failed to register papyrus functions. Aborting plugin load.");
+		return false;
+	}
+
+	LOG_INFO("Plugin loaded successfully.");
+
+	return true;
+}

@@ -2,18 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="SoulGemBuffer.cpp" />
     <ClCompile Include="WeaponRecharge.cpp" />
     <ClCompile Include="PapyrusWeaponRecharge.cpp" />
+    <ClCompile Include="PCH.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SoulGemBuffer.h" />
     <ClInclude Include="WeaponRecharge.h" />
     <ClInclude Include="PapyrusWeaponRecharge.h" />
-    <ClInclude Include="Debug.h" />
+    <ClInclude Include="PCH.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
-    <None Include="Exports.def" />
   </ItemGroup>
 </Project>

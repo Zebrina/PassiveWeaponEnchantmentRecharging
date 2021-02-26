@@ -21,35 +21,34 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2BDF120B-54BF-49D2-88FF-BE26057C50F5}</ProjectGuid>
     <RootNamespace>GearedUp</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
     <ProjectName>PassiveWeaponEnchantmentRecharging</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -77,21 +76,28 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(CommonLibSSE_IncludePaths);$(IncludePath)</IncludePath>
+    <LibraryPath>$(CommonLibSSE_LibraryPaths);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(CommonLibSSE_IncludePaths);$(IncludePath)</IncludePath>
+    <LibraryPath>$(CommonLibSSE_DebugLibraryPaths);$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Dev\CommonLibSSE\CommonLibSSE\include;$(IncludePath)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <ForcedIncludeFiles>common/IPrefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>No</GenerateDebugInformation>
-      <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>CommonLibSSE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(ModOrganizerModsDir)$(ModName)" mklink /J "$(ModOrganizerModsDir)$(ModName)" "$(ProjectDir)Distributable"
@@ -100,23 +106,38 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <ForcedIncludeFiles>PCH.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalOptions>%(AdditionalOptions) /experimental:external /external:anglebrackets /external:W0</AdditionalOptions>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_UNICODE;WINVER=0x0601;_WIN32_WINNT=0x0601;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;FMT_LOCALE;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <SDLCheck>true</SDLCheck>
-      <ForcedIncludeFiles>common\IPrefix.h;Debug.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(IncludePath)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(CommonLibSSE_DebugDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>echo Copying DLL to distributable directory.
-xcopy "$(TargetPath)" "$(ProjectDir)Distributable\SKSE\Plugins\$(TargetName)$(TargetExt)" /Y
-echo Copying distributable directory to Skyrim Special Edition data directory.
-xcopy "$(ProjectDir)Distributable\*.dll" "C:\Games\Steam\SteamApps\Common\Skyrim Special Edition\Data\" /Y/S</Command>
+      <Command>xcopy "$(TargetPath)" "$(ProjectDir)Data\SKSE\Plugins\" /Y
+xcopy "$(TargetDir)$(TargetName).pdb" "$(ProjectDir)Data\SKSE\Plugins\" /Y</Command>
+      <Message>Copying DLL to data directory.</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>set mo2_target="$(LOCALAPPDATA)\ModOrganizer\Skyrim Special Edition\mods\Passive Weapon Enchantment Recharging\"
+If NOT exist %mo2_target% mklink /J %mo2_target% "$(ProjectDir)Data\"</Command>
+      <Message>Setting up link to Mod Organizer mod directory.</Message>
+    </PreBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -124,16 +145,16 @@ xcopy "$(ProjectDir)Distributable\*.dll" "C:\Games\Steam\SteamApps\Common\Skyrim
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Dev\CommonLibSSE\CommonLibSSE\include;$(IncludePath)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <ForcedIncludeFiles>common/IPrefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ForcedIncludeFiles>ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>CommonLibSSE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -143,56 +164,56 @@ copy /Y /B "$(OutDir)$(ProjectName).dll" "$(ProjectDir)Distributable\SKSE\Plugin
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <ForcedIncludeFiles>PCH.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_UNICODE;WINVER=0x0601;_WIN32_WINNT=0x0601;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;FMT_LOCALE;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
       <SDLCheck>true</SDLCheck>
-      <ForcedIncludeFiles>common\IPrefix.h;Debug.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(IncludePath)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>Exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(CommonLibSSE_Dependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(TargetPath)" "$(ProjectDir)Data\SKSE\Plugins\" /Y</Command>
+      <Command>xcopy "$(TargetPath)" "$(ProjectDir)Data\SKSE\Plugins\" /Y
+del /Q "$(ProjectDir)Data\SKSE\Plugins\$(TargetName).pdb" &gt;nul 2&gt;&amp;1</Command>
       <Message>Copying DLL to data directory.</Message>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>set mo2_target="$(LOCALAPPDATA)\ModOrganizer\SkyrimSE\mods\Passive Weapon Enchantment Recharging\"
+      <Command>set mo2_target="$(LOCALAPPDATA)\ModOrganizer\Skyrim Special Edition\mods\Passive Weapon Enchantment Recharging\"
 If NOT exist %mo2_target% mklink /J %mo2_target% "$(ProjectDir)Data\"</Command>
       <Message>Setting up link to Mod Organizer mod directory.</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="Exports.def" />
     <None Include="PropertySheet.props" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PapyrusWeaponRecharge.cpp" />
-    <ClCompile Include="SoulGemBuffer.cpp" />
+    <ClCompile Include="PCH.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="WeaponRecharge.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debug.h" />
     <ClInclude Include="PapyrusWeaponRecharge.h" />
-    <ClInclude Include="SoulGemBuffer.h" />
+    <ClInclude Include="PCH.h" />
     <ClInclude Include="WeaponRecharge.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\common\common_vc14.vcxproj">
-      <Project>{472e19ab-def0-42df-819b-18722e8dc822}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\skse64\skse64.vcxproj">
-      <Project>{7028b79c-06e3-4d9a-b38c-1dc3680b1bdb}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\skse64_common\skse64_common.vcxproj">
-      <Project>{5fd1c08d-db80-480c-a1c6-f0920005cd13}</Project>
+    <ProjectReference Include="..\CommonLibSSE\build\CommonLibSSE.vcxproj">
+      <Project>{a8f8e207-4ca3-345f-96d7-2337ce9ef62e}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

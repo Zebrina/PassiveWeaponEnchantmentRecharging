@@ -1,56 +1,17 @@
 #include "WeaponRecharge.h"
 
-#include "skse64/GameData.h"
-#include "skse64/GameFormComponents.h"
-#include "skse64/GameExtraData.h"
-#include "skse64/GameRTTI.h"
+using namespace RE;
 
-//#include <list>
-//#include <queue>
-//#include <set>
-//#include <map>
-//#include <algorithm>
-
-#define ENCHANTING_AVID	23
-#define RIGHTITEMCHARGE_AVID 64
-#define LEFTITEMCHARGE_AVID 82
-
-template <class T>
-struct AcceptEqual {
-	T t;
-
-	AcceptEqual(T _t) : t(_t) {}
-
-	bool operator()(T u) {
-		return u == t;
-	}
-
-	bool Accept(T u) {
-		return u == t;
-	}
-};
-
-bool getActorDataList(Actor* actor, EntryDataList** out) {
-	if (ExtraContainerChanges* containerChanges = static_cast<ExtraContainerChanges*>(actor->extraData.GetByType(kExtraData_ContainerChanges))) {
-		if (EntryDataList* containerDataList = containerChanges->data ? containerChanges->data->objList : nullptr) {
-			*out = containerDataList;
+bool GetActorInventoryDataList(Actor* actor, BSSimpleList<InventoryEntryData*>*& out) {
+	if (ExtraContainerChanges* containerChanges = static_cast<ExtraContainerChanges*>(actor->extraList.GetByType(ExtraDataType::kContainerChanges))) {
+		if (BSSimpleList<InventoryEntryData*>* containerDataList = containerChanges->changes ? containerChanges->changes->entryList : nullptr) {
+			out = containerDataList;
 			return true;
 		}
 	}
 	return false;
 }
 
-struct ObjectWithExtraList {
-	TESForm* form;
-	BaseExtraList* extra;
-
-	ObjectWithExtraList(TESForm* _form, BaseExtraList* _extra) :
-		form(_form), extra(_extra) {}
-
-	bool operator<(const ObjectWithExtraList& other) {
-		return form->formID < other.form->formID;
-	}
-};
 enum ForEachResult {
 	Continue,
 	Abort,
@@ -59,16 +20,17 @@ enum ForEachResult {
 
 /* Functor(Actor*) */
 template <class Functor>
-void forEachActorInPlayerCell(Functor& f) {
+void ForEachActorInPlayerCell(Functor f) {
 	ForEachResult lastResult = Continue;
 
 	do {
-		if (TESObjectCELL* currentCell = (*g_thePlayer)->parentCell) {
-			tArray<TESObjectREFR*>& refList = currentCell->objectList;
+		if (TESObjectCELL* currentCell = PlayerCharacter::GetSingleton()->parentCell) {
+			BSTArray<TESObjectREFR*>& refList = currentCell->objectList;
 
-			for (UInt32 i = 0; i < refList.count; ++i) {
-				if (Actor* actor = DYNAMIC_CAST(refList[i], TESObjectREFR, Actor)) {
-					lastResult = f(actor);
+			for (auto i = refList.begin(); i != refList.end(); ++i) {
+				TESObjectREFR* ref = *i;
+				if (ref->formType == FormType::ActorCharacter) {
+					lastResult = f(static_cast<Actor*>(ref));
 					if (lastResult != Continue) {
 						break;
 					}
@@ -78,33 +40,29 @@ void forEachActorInPlayerCell(Functor& f) {
 	}
 	while (lastResult == StartOver);
 }
-/* bool Functor(Actor*, T*, BaseExtraList*) */
-/* If T is TESForm (default) all form types will be processed. */
-template <class T = TESForm, class Functor>
-void forEachObjectInActorInventory(Actor* actor, Functor& f) {
+/* ForEachResult Functor(Actor*, TESBoundObject*, ExtraDataList*) */
+template <class Functor>
+void ForEachObjectInActorInventory(Actor* actor, Functor f) {
 	ForEachResult lastResult = Continue;
-	EntryDataList* containerDataList;
+	BSSimpleList<InventoryEntryData*>* containerDataList;
 
 	do {
-		if (getActorDataList(actor, &containerDataList)) {
-			for (auto i = containerDataList->Begin(); !i.End(); ++i) {
-				auto e = i.Get();
+		if (GetActorInventoryDataList(actor, containerDataList)) {
+			for (auto i = containerDataList->begin(); i != containerDataList->end(); ++i) {
+				InventoryEntryData* e = *i;
 
-				if (e && e->type && (T::kTypeID == 0 || e->type->formType == T::kTypeID)) {
-					T* t = static_cast<T*>(e->type);
-
-					if (e->extendDataList) {
-						for (auto j = e->extendDataList->Begin(); !j.End(); ++j) {
-							lastResult = f(actor, t, j.Get());
-							if (lastResult != Continue) {
-								break;
-							}
+				if (e->extraLists) {
+					for (auto j = e->extraLists->begin(); j != e->extraLists->end(); ++j) {
+						lastResult = f(actor, e->object, *j);
+						if (lastResult != Continue) {
+							break;
 						}
 					}
-					else {
-						lastResult = f(actor, t, nullptr);
-					}
 				}
+				else {
+					lastResult = f(actor, e->object, nullptr);
+				}
+
 				if (lastResult != Continue) {
 					break;
 				}
@@ -114,27 +72,11 @@ void forEachObjectInActorInventory(Actor* actor, Functor& f) {
 	while (lastResult == StartOver);
 }
 
-void updateActorEquippedWeapon(Actor* actor, TESObjectWEAP* weapon, BaseExtraList* extra) {
-	if (extra) {
-		if (extra->HasType(kExtraData_WornLeft)) {
-			CALL_MEMBER_FN(actor, UpdateWeaponAbility)(weapon, extra, true);
-		}
-		else if (extra->HasType(kExtraData_Worn)) {
-			CALL_MEMBER_FN(actor, UpdateWeaponAbility)(weapon, extra, false);
-		}
-	}
-}
-void updateActorEquippedArmor(Actor* actor, TESObjectARMO* armor, BaseExtraList* extra) {
-	if (extra && extra->HasType(kExtraData_Worn)) {
-		CALL_MEMBER_FN(actor, UpdateArmorAbility)(armor, extra);
-	}
-}
-
 /* Weapon recharging. */
 
-float getActorEnchantingMultiplier(Actor* actor, float baseEnchantMultiplier) {
+float GetActorEnchantingMultiplier(Actor* actor, float baseEnchantMultiplier) {
 	if (baseEnchantMultiplier > 1.0f) {
-		return (1.0f + (baseEnchantMultiplier - 1.0f) * actor->actorValueOwner.GetCurrent(ENCHANTING_AVID) / 100.0f);
+		return (1.0f + (baseEnchantMultiplier - 1.0f) * actor->GetActorValue(ActorValue::kEnchanting) / 100.0f);
 	}
 	return 1.0f;
 }
@@ -142,50 +84,62 @@ float getActorEnchantingMultiplier(Actor* actor, float baseEnchantMultiplier) {
 struct RechargeWeapon {
 	float pointsToRecharge;
 	float baseEnchantingMultiplier;
-	float rechargedPoints;
+	float* rechargedPoints;
 
+	RechargeWeapon(float _pointsToRecharge, float _baseEnchantingMultiplier, float& _rechargedPoints) :
+		pointsToRecharge(_pointsToRecharge),
+		baseEnchantingMultiplier(_baseEnchantingMultiplier),
+		rechargedPoints(&_rechargedPoints) {
+	}
 	RechargeWeapon(float _pointsToRecharge, float _baseEnchantingMultiplier) :
 		pointsToRecharge(_pointsToRecharge),
 		baseEnchantingMultiplier(_baseEnchantingMultiplier),
-		rechargedPoints(0.0f) {
+		rechargedPoints(nullptr) {
 	}
 
-	ForEachResult operator()(Actor* actor, TESObjectWEAP* weapon, BaseExtraList* extra) {
-		if (extra) {
+	ForEachResult operator()(Actor* actor, TESBoundObject* object, ExtraDataList* extra) {
+		if (object->formType == FormType::Weapon && extra) {
+			TESObjectWEAP* weapon = static_cast<TESObjectWEAP*>(object);
+
 			float maxCharge = 0.0f;
-			if (weapon->enchantable.enchantment) {
-				maxCharge = (float)weapon->enchantable.maxCharge;
-			} else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(extra->GetByType(kExtraData_Enchantment))) {
-				maxCharge = (float)extraEnchant->maxCharge;
+			if (weapon->formEnchanting) {
+				maxCharge = (float)weapon->amountofEnchantment;
+			} else if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(extra->GetByType(ExtraDataType::kEnchantment))) {
+				maxCharge = (float)extraEnchant->charge;
 			}
 
 			if (maxCharge > 0.0f) {
-				float pointsToRechargeForActor = pointsToRecharge * getActorEnchantingMultiplier(actor, baseEnchantingMultiplier);
+				float pointsToRechargeForActor = pointsToRecharge * GetActorEnchantingMultiplier(actor, baseEnchantingMultiplier);
 
-				bool wornLeft = extra->HasType(kExtraData_WornLeft);
-				bool wornRight = !wornLeft && extra->HasType(kExtraData_Worn);
+				bool wornLeft = extra->HasType(ExtraDataType::kWornLeft);
+				bool wornRight = !wornLeft && extra->HasType(ExtraDataType::kWorn);
 				if (wornLeft || wornRight) {
-					UInt32 actorValueID = wornLeft ? LEFTITEMCHARGE_AVID : RIGHTITEMCHARGE_AVID;
+					ActorValue actorValue = wornLeft ? ActorValue::kLeftItemCharge : ActorValue::kRightItemCharge;
 
-					float itemCharge = actor->actorValueOwner.GetCurrent(actorValueID);
+					float itemCharge = actor->GetActorValue(actorValue);
 
-					_DMESSAGE("charge: %.2f / %.2f", itemCharge, maxCharge);
+					LOG_TRACE("charge: {:.2f} / {:.2f}", itemCharge, maxCharge);
 
 					if (itemCharge < maxCharge) {
-						pointsToRechargeForActor = min(maxCharge - itemCharge, pointsToRechargeForActor);
-						rechargedPoints += pointsToRechargeForActor;
-						actor->actorValueOwner.ModBase(actorValueID, pointsToRechargeForActor);
+						pointsToRechargeForActor = std::min(maxCharge - itemCharge, pointsToRechargeForActor);
+						if (rechargedPoints) {
+							*rechargedPoints += pointsToRechargeForActor;
+						}
+						actor->ModActorValue(actorValue, pointsToRechargeForActor);
 					}
-				} else if (ExtraCharge* extraCharge = static_cast<ExtraCharge*>(extra->GetByType(kExtraData_Charge))) {
-					rechargedPoints += min(pointsToRechargeForActor, maxCharge - extraCharge->charge);
-					extraCharge->charge = min(maxCharge, extraCharge->charge + pointsToRechargeForActor);
+				} else if (ExtraCharge* extraCharge = static_cast<ExtraCharge*>(extra->GetByType(ExtraDataType::kCharge))) {
+					if (rechargedPoints) {
+						*rechargedPoints += std::min(pointsToRechargeForActor, maxCharge - extraCharge->charge);
+					}
+					extraCharge->charge = std::min(maxCharge, extraCharge->charge + pointsToRechargeForActor);
 
-					_DMESSAGE("charge: %.2f / %.2f", extraCharge->charge, maxCharge);
+					LOG_TRACE("charge: {:.2f} / {:.2f}", extraCharge->charge, maxCharge);
 
 					// Remove extra charge if full.
 					if (extraCharge->charge == maxCharge) {
-						extra->Remove(kExtraData_Charge, extraCharge);
-						_DMESSAGE("extra charge removed");
+						extra->Remove(ExtraDataType::kCharge, extraCharge);
+
+						LOG_TRACE("extra charge removed");
 					}
 				}
 			}
@@ -195,67 +149,35 @@ struct RechargeWeapon {
 	}
 };
 
-float WeaponRecharge::RechargeAllWeaponsInInventory(Actor* actor, float points, float enchantingMultiplier, bool requireSoulGem) {
+float WeaponRecharge::RechargeAllWeaponsInInventory(Actor* actor, float points, float enchantingMultiplier) {
 	if (actor && points > 0.0f) {
-		RechargeWeapon recharge(points, enchantingMultiplier);
+		float rechargedPoints = 0.0f;
 
-		forEachObjectInActorInventory<TESObjectWEAP>(actor, recharge);
+		ForEachObjectInActorInventory(actor, RechargeWeapon(points, enchantingMultiplier, rechargedPoints));
 
-		return recharge.rechargedPoints;
+		return rechargedPoints;
 	}
-	return 0;
+	return 0.0f;
 }
-void WeaponRecharge::RechargeAllWeaponsInPlayerCell(float points, float enchantingMultiplier, TESFaction* filterFaction, bool requireSoulGem) {
-	struct RechargeActorWeapons {
-		class IsInFaction : public Actor::FactionVisitor {
-		public:
-			TESFaction* factionToLookFor;
-
-			IsInFaction(TESFaction* faction) : factionToLookFor(faction) {}
-
-			virtual bool Accept(TESFaction* faction, SInt8 rank) {
-				return !(faction == factionToLookFor && rank >= 0);
-			}
-		};
-
-		TESFaction* filterFaction;
-		float pointsToRecharge;
-		float baseEnchantingMultiplier;
-
-		RechargeActorWeapons(TESFaction* _filterFaction, float _pointsToRecharge, float _baseEnchantingMultiplier) :
-			filterFaction(_filterFaction), pointsToRecharge(_pointsToRecharge), baseEnchantingMultiplier(_baseEnchantingMultiplier) {}
-
-		ForEachResult operator()(Actor* actor) {
-			if (filterFaction == nullptr || !(actor->VisitFactions(IsInFaction(filterFaction)))) {
-				forEachObjectInActorInventory<TESObjectWEAP>(actor, RechargeWeapon(pointsToRecharge, baseEnchantingMultiplier));
+void WeaponRecharge::RechargeAllWeaponsInPlayerCell(float points, float enchantingMultiplier, TESFaction* filterFaction) {
+	if (points > 0.0f) {
+		ForEachActorInPlayerCell([filterFaction, points, enchantingMultiplier](Actor* actor)->ForEachResult {
+			if (filterFaction == nullptr || !(actor->IsInFaction(filterFaction))) {
+				ForEachObjectInActorInventory(actor, RechargeWeapon(points, enchantingMultiplier));
 			}
 
 			return Continue;
-		}
-	};
-
-	if (points > 0) {
-		forEachActorInPlayerCell(RechargeActorWeapons(filterFaction, points, enchantingMultiplier));
+		});
 	}
 }
-void WeaponRecharge::RechargeAllWeaponsInFollowerInventory(float points, float enchantingMultiplier, bool requireSoulGem) {
-	struct RechargeActorWeapons {
-		float pointsToRecharge;
-		float baseEnchantingMultiplier;
-
-		RechargeActorWeapons(float _pointsToRecharge, float _baseEnchantingMultiplier) :
-			pointsToRecharge(_pointsToRecharge), baseEnchantingMultiplier(_baseEnchantingMultiplier) {}
-
-		ForEachResult operator()(Actor* actor) {
-			if (actor->flags1 & Actor::kFlags_IsPlayerTeammate) {
-				forEachObjectInActorInventory<TESObjectWEAP>(actor, RechargeWeapon(pointsToRecharge, baseEnchantingMultiplier));
+void WeaponRecharge::RechargeAllWeaponsInFollowerInventory(float points, float enchantingMultiplier) {
+	if (points > 0.0f) {
+		ForEachActorInPlayerCell([points, enchantingMultiplier](Actor* actor)->ForEachResult {
+			if (actor->IsPlayerTeammate()) {
+				ForEachObjectInActorInventory(actor, RechargeWeapon(points, enchantingMultiplier));
 			}
 
 			return Continue;
-		}
-	};
-
-	if (points > 0) {
-		forEachActorInPlayerCell(RechargeActorWeapons(points, enchantingMultiplier));
+		});
 	}
 }

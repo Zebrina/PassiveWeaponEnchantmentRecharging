@@ -1,22 +1,17 @@
 #pragma once
 
-struct StaticFunctionTag;
-class Actor;
-class TESFaction;
-class VMClassRegistry;
-
 namespace PapyrusWeaponRecharge {
 
 	/* Weapon recharging. */
 
-	float RechargeAllWeaponsInInventory(StaticFunctionTag*, Actor* actor, float points, float enchantingMultiplier, bool requireSoulGem);
+	float RechargeAllWeaponsInInventory(RE::StaticFunctionTag*, RE::Actor* actor, float points, float enchantingMultiplier);
 	// Recharge all items of actors in the cell and in the faction provided. If faction is none recharging will be processed on all actors.
-	void RechargeAllWeaponsInPlayerCell(StaticFunctionTag*, float points, float enchantingMultiplier, TESFaction* filterFaction, bool requireSoulGem);
+	void RechargeAllWeaponsInPlayerCell(RE::StaticFunctionTag*, float points, float enchantingMultiplier, RE::TESFaction* filterFaction);
 	// Recharge follower weapons.
-	void RechargeAllWeaponsInFollowerInventory(StaticFunctionTag*, float points, float enchantingMultiplier, bool requireSoulGem);
+	void RechargeAllWeaponsInFollowerInventory(RE::StaticFunctionTag*, float points, float enchantingMultiplier);
 
 	// Misc.
 
 	/* Registration */
-	bool RegisterFunctions(VMClassRegistry* registry);
+	bool RegisterFunctions(RE::BSScript::IVirtualMachine* registry);
 }
