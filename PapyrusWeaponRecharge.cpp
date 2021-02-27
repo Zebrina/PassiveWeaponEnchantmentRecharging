@@ -4,7 +4,7 @@
 using namespace RE;
 
 float PapyrusWeaponRecharge::RechargeAllWeaponsInInventory(StaticFunctionTag*, Actor* actor, float points, float enchantingMultiplier) {
-	LOG_TRACE("calling RechargeAllWeaponsInInventory({:#x}, {:f}, {:f})", actor ? actor->formID : 0, points, enchantingMultiplier);
+	LOG_TRACE("calling RechargeAllWeaponsInInventory({:X}, {:f}, {:f})", actor ? actor->formID : 0, points, enchantingMultiplier);
 	return WeaponRecharge::RechargeAllWeaponsInInventory(actor, points, enchantingMultiplier);
 }
 void PapyrusWeaponRecharge::RechargeAllWeaponsInPlayerCell(StaticFunctionTag*, float points, float enchantingMultiplier, TESFaction* filterFaction) {

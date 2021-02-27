@@ -25,17 +25,12 @@ void ForEachActorInPlayerCell(Functor f) {
 
 	do {
 		if (TESObjectCELL* currentCell = PlayerCharacter::GetSingleton()->parentCell) {
-			BSTArray<TESObjectREFR*>& refList = currentCell->objectList;
-
-			for (auto i = refList.begin(); i != refList.end(); ++i) {
-				TESObjectREFR* ref = *i;
-				if (ref->formType == FormType::ActorCharacter) {
-					lastResult = f(static_cast<Actor*>(ref));
-					if (lastResult != Continue) {
-						break;
-					}
+			currentCell->ForEachReference([f, &lastResult](TESObjectREFR& ref)->bool {
+				if (ref.formType == FormType::ActorCharacter) {
+					lastResult = f(static_cast<Actor*>(&ref));
 				}
-			}
+				return lastResult == Continue;
+			});
 		}
 	}
 	while (lastResult == StartOver);
@@ -100,6 +95,8 @@ struct RechargeWeapon {
 	ForEachResult operator()(Actor* actor, TESBoundObject* object, ExtraDataList* extra) {
 		if (object->formType == FormType::Weapon && extra) {
 			TESObjectWEAP* weapon = static_cast<TESObjectWEAP*>(object);
+
+			LOG_TRACE("recharging weapon {:X} for actor {:X}", actor->formID, weapon->formID);
 
 			float maxCharge = 0.0f;
 			if (weapon->formEnchanting) {
@@ -174,6 +171,8 @@ void WeaponRecharge::RechargeAllWeaponsInFollowerInventory(float points, float e
 	if (points > 0.0f) {
 		ForEachActorInPlayerCell([points, enchantingMultiplier](Actor* actor)->ForEachResult {
 			if (actor->IsPlayerTeammate()) {
+				LOG_TRACE("found player follower");
+
 				ForEachObjectInActorInventory(actor, RechargeWeapon(points, enchantingMultiplier));
 			}
 
