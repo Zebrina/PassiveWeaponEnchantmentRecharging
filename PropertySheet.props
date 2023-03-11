@@ -6,8 +6,8 @@
     <CommonLibSSE_IncludePaths>$(SolutionDir)..\CommonLibSSE\include;$(SolutionDir)..\CommonLibSSE\build\vcpkg_installed\x64-windows-static-md\include;</CommonLibSSE_IncludePaths>
     <CommonLibSSE_LibraryPaths>$(SolutionDir)..\CommonLibSSE\build\$(Configuration);$(SolutionDir)..\CommonLibSSE\build\vcpkg_installed\x64-windows-static-md\lib;</CommonLibSSE_LibraryPaths>
     <CommonLibSSE_DebugLibraryPaths>$(SolutionDir)..\CommonLibSSE\build\$(Configuration);$(SolutionDir)..\CommonLibSSE\build\vcpkg_installed\x64-windows-static-md\debug\lib;</CommonLibSSE_DebugLibraryPaths>
-    <CommonLibSSE_Dependencies>CommonLibSSE.lib;fmt.lib;spdlog.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</CommonLibSSE_Dependencies>
-    <CommonLibSSE_DebugDependencies>CommonLibSSE.lib;fmtd.lib;spdlogd.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</CommonLibSSE_DebugDependencies>
+    <CommonLibSSE_Dependencies>CommonLibSSE.lib;binary_io.lib;fmt.lib;spdlog.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</CommonLibSSE_Dependencies>
+    <CommonLibSSE_DebugDependencies>CommonLibSSE.lib;binary_iod.lib;fmtd.lib;spdlogd.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</CommonLibSSE_DebugDependencies>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup>
